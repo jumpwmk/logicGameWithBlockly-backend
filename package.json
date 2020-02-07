@@ -1,0 +1,23 @@
+{
+  "name": "logicgamewithblockly-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jumpwmk/logicGameWithBlockly-backend.git"
+  },
+  "author": "Methus Kiatchaiwat",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jumpwmk/logicGameWithBlockly-backend/issues"
+  },
+  "homepage": "https://github.com/jumpwmk/logicGameWithBlockly-backend#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "firebase": "^7.8.1"
+  }
+}
