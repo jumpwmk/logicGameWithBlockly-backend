@@ -2,9 +2,12 @@
   "name": "logicgamewithblockly-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon app/server.js",
+    "start": "NODE_ENV=test nodemon app/server.js",
+    "prod": "NODE_ENV=production nodemon app/server.js",
+    "test": "NODE_ENV=test mocha --exit"
   },
   "repository": {
     "type": "git",
@@ -17,7 +20,22 @@
   },
   "homepage": "https://github.com/jumpwmk/logicGameWithBlockly-backend#readme",
   "dependencies": {
+    "bluebird": "^3.7.2",
+    "body-parser": "^1.19.0",
+    "chai": "^4.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "firebase": "^7.8.1"
+    "express-fileupload": "^1.1.6",
+    "firebase": "^7.8.1",
+    "firebase-admin": "^8.9.2",
+    "joi": "^14.3.1",
+    "json2csv": "^4.5.4",
+    "jsonwebtoken": "^8.5.1",
+    "nodemon": "^2.0.2",
+    "uuid": "^3.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0"
   }
 }
