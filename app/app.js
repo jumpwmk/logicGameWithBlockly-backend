@@ -4,7 +4,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const db = require('./db');
-const port = 3001;
 
 const maps = require('./maps');
 // Setting Endpoint (Middleware)
@@ -19,7 +18,5 @@ app.get('/', (req, res) => {
 });
 
 app.use('/maps', maps);
-
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
 module.exports = app;

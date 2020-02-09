@@ -1,5 +1,4 @@
 import { random_by_choice, slice_2d_array, shuffle } from '../utils/utils';
-
 import { basic_for_loop_commands } from './basicCommands';
 
 export function for_loop_commands(obj) {

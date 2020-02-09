@@ -5,7 +5,7 @@
   "main": "app/app.js",
   "scripts": {
     "dev": "nodemon app/server.js",
-    "start": "NODE_ENV=test nodemon app/server.js",
+    "start": "NODE_ENV=test nodemon --exec babel-node app/server.js",
     "prod": "NODE_ENV=production nodemon app/server.js",
     "test": "NODE_ENV=test mocha --exit"
   },
@@ -20,11 +20,13 @@
   },
   "homepage": "https://github.com/jumpwmk/logicGameWithBlockly-backend#readme",
   "dependencies": {
+    "babel": "^6.23.0",
     "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
     "chai": "^4.2.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
+    "es6": "0.0.7",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6",
     "firebase": "^7.8.1",
@@ -32,10 +34,14 @@
     "joi": "^14.3.1",
     "json2csv": "^4.5.4",
     "jsonwebtoken": "^8.5.1",
+    "node": "^13.7.0",
     "nodemon": "^2.0.2",
     "uuid": "^3.4.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/node": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
     "eslint": "^6.8.0"
   }
 }

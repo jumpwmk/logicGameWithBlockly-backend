@@ -1,7 +1,8 @@
-import { random_by_choice, slice_2d_array, shuffle } from '../utils/utils';
-
+import { slice_2d_array } from '../utils/utils';
 import { basic_commands, reverse_basic_commands } from './basicCommands';
 import { for_loop_commands } from './loopCommands';
+
+import { mapW_real, mapH_real, mapW, mapH } from '../config/constant';
 
 const { PriorityQueue } = require('../utils/priority_queue');
 const { UnionFind } = require('../utils/union_find');
@@ -64,20 +65,20 @@ function remove_wall(obj) {
 }
 
 function build_permanent_wall(obj) {
-  var mapData = obj.mapData;
-  var condition = obj.condition;
-  var bot = mapData.bot;
-  var word_to_direction = { ahead: 0, left: 3, right: 1 };
-  var directions = [
+  let { mapData, condition } = obj;
+
+  let bot = mapData.bot;
+  let word_to_direction = { ahead: 0, left: 3, right: 1 };
+  let directions = [
     [-1, 0],
     [0, 1],
     [1, 0],
     [0, -1]
   ];
-  var x = bot.x,
-    y = bot.y;
-  var direction = bot.facing + word_to_direction[condition];
-  var overlaytype = 1;
+  let x = bot.x;
+  let y = bot.y;
+  let direction = bot.facing + word_to_direction[condition];
+  let overlaytype = 1;
 
   mapData.wall[x][y][direction] = { walltype: overlaytype, permanent: true };
   x = x + directions[direction];
@@ -100,7 +101,8 @@ function init_mapData() {
     enemies: new Array(mapW_real).fill().map(() => new Array(mapH_real).fill(undefined)),
     tileoverlay: new Array(mapW_real).fill().map(() => new Array(mapH_real).fill(undefined)),
     floatingobj: new Array(mapW_real).fill().map(() => new Array(mapH_real).fill(undefined)),
-    walloverlay: new Array(mapW_real).fill().map(() => new Array(mapH_real).fill(undefined))
+    walloverlay: new Array(mapW_real).fill().map(() => new Array(mapH_real).fill(undefined)),
+    tiles: new Array(mapW_real).fill().map(() => new Array(mapH_real).fill(0))
   };
   for (var i = 0; i < mapW_real; i++) {
     for (var j = 0; j < mapH_real; j++) {
@@ -157,19 +159,6 @@ function generate_distraction(obj) {
     }
   }
 
-  // console.log('print head');
-  // for(var i = 0; i < mapW; i++){
-  //     for(var j = 0; j < mapH; j++){
-  //         console.log(i, j, mapData.count[i][j]);
-  //         if(mapData.count[i][j] > 0){
-  //             console.log(i, j, uf.find(cal_position(i, j)));
-  //         }
-  //     }
-  // }
-
-  // console.log('generate_distraction');
-  // console.log('number of distractions is', number_of_distractions);
-
   while (number_of_distractions-- && !pq.isEmpty()) {
     var obj = pq.pop().element;
     var x = obj.x,
@@ -183,12 +172,11 @@ function generate_distraction(obj) {
 
     if (h1 !== h2) {
       remove_wall({ x: x, y: y, mapData: mapData, facing: dir });
-      // console.log(x, y, dir);
+
       uf.union(pos1, pos2);
       x = obj.x + directions[dir][0];
       y = obj.y + directions[dir][1];
-      // console.log('x =', x, 'y =', y);
-      // console.log(x, y, mapData.wall[x][y][(dir + 2)%4]);
+
       remove_wall({ x: x, y: y, mapData: mapData, facing: (dir + 2) % 4 });
       mapData.platform[x][y] = 1;
 
@@ -363,8 +351,38 @@ function generate_map(obj) {
   return true;
 }
 
+function generate_tiles(mapData) {
+  // const direction_to_word = ['xb', 'yf', 'xf', 'yb'];
+  const direction_to_num = [1, 2, 4, 8];
+
+  const nxt = { 0: [-1, 0], 1: [0, 1], 2: [1, 0], 3: [0, -1] };
+
+  const FINAL = 1024;
+
+  for (var i = 0; i < mapW; i++) {
+    for (var j = 0; j < mapH; j++) {
+      for (var k = 0; k < 4; k++) {
+        if (mapData.wall[i][j] !== undefined && k in mapData.wall[i][j]) {
+          mapData.tiles[i][j] += direction_to_num[k];
+        } else {
+          const nx_ii = i + nxt[k][0];
+          const nx_jj = j + nxt[k][1];
+          if (mapData.platform[i][j] === 1 && mapData.platform[nx_ii][nx_jj] === 0) {
+            mapData.tiles[i][j] += direction_to_num[k];
+          }
+        }
+      }
+    }
+  }
+
+  mapData.tiles[mapData.end.x][mapData.end.y] += FINAL;
+
+  return;
+}
+
 function transform_map(obj) {
-  var mapData = obj.mapData;
+  let { mapData } = obj;
+
   var bot = mapData.bot;
   var number_of_distractions = obj.number_of_distractions;
 
@@ -399,13 +417,13 @@ function transform_map(obj) {
 
   if (mxX - mnX + 1 > mapW || mxY - mnY + 1 > mapH) return false;
 
-  stX = mnX - Math.floor((mapW - (mxX - mnX + 1)) / 2);
-  stY = mnY - Math.floor((mapH - (mxY - mnY + 1)) / 2);
+  let stX = mnX - Math.floor((mapW - (mxX - mnX + 1)) / 2);
+  let stY = mnY - Math.floor((mapH - (mxY - mnY + 1)) / 2);
 
   // console.log(mapData.start.facing);
-  mapData.start = {
-    x: mapData.start.x - stX,
-    y: mapData.start.y - stY,
+  mapData.player = {
+    position: [mapData.start.x - stX, mapData.start.y - stY],
+    beginPosition: [mapData.start.x - stX, mapData.start.y - stY],
     facing: direction_to_word[mapData.start.facing]
   };
   mapData.end = { x: mapData.end.x - stX, y: mapData.end.y - stY };
@@ -418,6 +436,7 @@ function transform_map(obj) {
   mapData.check = slice_2d_array(mapData.check, stX, stX + mapW, stY, stY + mapH);
   mapData.check_object = slice_2d_array(mapData.check_object, stX, stX + mapW, stY, stY + mapH);
   mapData.walloverlay = slice_2d_array(mapData.walloverlay, stX, stX + mapW, stY, stY + mapH);
+  mapData.tiles = slice_2d_array(mapData.tiles, stX, stX + mapW, stY, stY + mapH);
 
   generate_distraction({ mapData: mapData, number_of_distractions: number_of_distractions });
 
@@ -448,6 +467,8 @@ function transform_map(obj) {
     }
   }
 
+  generate_tiles(mapData);
+
   for (var i = 0; i < mapW; i++) {
     for (var j = 0; j < mapH; j++) {
       for (var k = 0; k < 4; k++) {
@@ -464,16 +485,19 @@ function transform_map(obj) {
   delete mapData.check_object;
   delete mapData.bot;
   delete mapData.count;
+  delete mapData.start;
 }
 
-function get_map(obj) {
+export function get_map(obj) {
   // console.log(obj);
-  var commandlength = obj.commandlength;
-  var commandlengthincondition = obj.commandlengthincondition;
-  var itemcollected = obj.itemcollected;
-  var numiteration = obj.numiteration;
-  var numturninloop = obj.numturninloop;
-  var number_of_distractions = obj.number_of_distractions;
+  let {
+    commandlength,
+    commandlengthincondition,
+    itemcollected,
+    numiteration,
+    numturninloop,
+    number_of_distractions
+  } = obj;
 
   if (commandlength === undefined) commandlength = 5;
   if (commandlengthincondition === undefined) commandlengthincondition = 0;
@@ -492,11 +516,12 @@ function get_map(obj) {
     type_of_actions = 5;
   }
 
-  console.log(probs_of_actions);
+  // console.log(probs_of_actions);
 
   var number_of_tries = 2000;
   while (number_of_tries--) {
     var chk = false;
+    let commands;
     if (commandlengthincondition > 0) {
       if (numiteration > 0)
         commands = if_else_tile_condition_commands_with_loop({
@@ -519,28 +544,30 @@ function get_map(obj) {
           number_of_commands: commandlength,
           number_of_iterations: numiteration
         });
-      else
+      else {
         commands = for_loop_commands({
           number_of_turns: numturninloop,
           number_of_commands: commandlength,
           number_of_iterations: numiteration
         });
+      }
     } else {
       commands = basic_commands({ number_of_commands: commandlength, probs_of_actions, type_of_actions });
     }
+
     // commands = for_loop_commands({number_of_turns: 3, number_of_commands: 6, number_of_iterations: 3});
     // commands = basic_commands({number_of_commands: 6});
     // commands = if_else_tile_condition_commands_with_loop({condition_type: "if", number_of_commands: 1, number_of_iterations: 20, is_reversed: false});
-    var number_of_tries_generate_map = 5;
+    let number_of_tries_generate_map = 5;
     while (number_of_tries_generate_map--) {
       var mapData = init_mapData();
-      if (generate_map({ commands: commands, mapData: mapData }) === false) continue;
-      if (transform_map({ mapData: mapData, number_of_distractions: number_of_distractions }) === false) continue;
+      if (generate_map({ commands, mapData }) === false) continue;
+      if (transform_map({ mapData, number_of_distractions }) === false) continue;
       chk = true;
       break;
     }
     if (chk) break;
   }
-  console.log(commands, mapData);
+  // console.log(commands, mapData);
   if (chk) return mapData;
 }

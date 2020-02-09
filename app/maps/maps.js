@@ -1,3 +1,5 @@
+import { get_map } from './generate_map';
+
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
@@ -20,29 +22,11 @@ const db = require('../db');
 //     });
 
 router.post('/get-map', async (req, res) => {
-  const tiles = [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 2, 13, 1, 7, 8, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 3, 10, 13, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 6, 8, 1031, 8, 0, 0, 0, 0, 0],
-    [0, 0, 0, 6, 9, 6, 9, 0, 0, 0, 0, 0, 0],
-    [0, 0, 6, 9, 6, 9, 0, 0, 0, 0, 0, 0, 0],
-    [0, 2, 9, 6, 9, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 2, 14, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-  ];
+  const maps = get_map({ commandlength: 7 });
 
-  const direction = 'NORTH';
-  const position = [120, 360];
-  const begin_position = [80, 360];
-  const walkIndex = 0;
+  const { player, ...tiles } = maps;
 
-  const player = { direction, position, begin_position, walkIndex };
-
+  // console.log(JSON.stringify(tiles));
   return res.status(200).json({ tiles, player });
 });
 

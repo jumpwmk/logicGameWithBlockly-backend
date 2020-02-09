@@ -20,7 +20,7 @@ export function basic_commands(obj) {
 
   let command = random_by_choice(type_of_actions, probs_of_actions);
   while (command > 2) command = random_by_choice(type_of_actions, probs_of_actions);
-  commands = [command];
+  let commands = [command];
 
   for (let i = 0; i < number_of_commands - 2; i++) {
     let chk = true;

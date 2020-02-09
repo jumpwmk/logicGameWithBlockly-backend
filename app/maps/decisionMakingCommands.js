@@ -1,6 +1,6 @@
 import { basic_commands_for_tile_condition } from './basicCommands';
 
-function if_path_condition_commands(obj) {
+export function if_path_condition_commands(obj) {
   let { commands, condition, commands_else, condition_type } = obj;
 
   if (commands === undefined) commands = [0];
@@ -15,7 +15,7 @@ function if_path_condition_commands(obj) {
   return commands;
 }
 
-function if_else_path_condition_commands(obj) {
+export function if_else_path_condition_commands(obj) {
   let { condition_type } = obj;
 
   if (condition_type === undefined) condition_type = 'if';
