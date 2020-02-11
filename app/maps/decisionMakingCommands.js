@@ -1,4 +1,5 @@
 import { basic_commands_for_tile_condition } from './basicCommands';
+import { shuffle } from '../utils/utils';
 
 export function if_path_condition_commands(obj) {
   let { commands, condition, commands_else, condition_type } = obj;
@@ -120,18 +121,14 @@ export function if_else_tile_condition_commands(obj) {
     commands = basic_commands_for_tile_condition({
       number_of_commands: number_of_commands,
       commands: commands,
-      is_reversed: is_reversed,
-      type_of_actions,
-      probs_of_actions
+      is_reversed: is_reversed
     });
     commands = if_tile_condition_commands({ commands: commands, condition: condition, condition_type: condition_type });
   } else if (condition_type === 'if_else') {
     commands = basic_commands_for_tile_condition({
       number_of_commands: number_of_commands,
       commands: commands,
-      is_reversed: is_reversed,
-      type_of_actions,
-      probs_of_actions
+      is_reversed: is_reversed
     });
     commands = if_tile_condition_commands({
       commands: commands,

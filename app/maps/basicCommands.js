@@ -165,8 +165,8 @@ export function basic_commands_for_tile_condition(obj) {
     } else if (number_of_commands === 2) {
       commands = [0, Math.floor(Math.random() * 2) + 1];
     } else {
-      command = random_by_choice((n = type_of_actions), (props = probs_of_actions));
-      while (command > 2) command = random_by_choice((n = type_of_actions), (props = probs_of_actions));
+      command = random_by_choice(type_of_actions, probs_of_actions);
+      while (command > 2) command = random_by_choice(type_of_actions, probs_of_actions);
       commands.push(command);
     }
   }
@@ -190,7 +190,7 @@ export function basic_commands_for_tile_condition(obj) {
     var chk = true;
     while (chk) {
       chk = false;
-      command = random_by_choice((n = type_of_actions), (props = probs_of_actions));
+      command = random_by_choice(type_of_actions, probs_of_actions);
       for (var excepted_command = 0; excepted_command < excepted_commands.length; excepted_command++) {
         if (
           commands[commands.length - 1] === excepted_commands[excepted_command][0] &&
@@ -203,8 +203,8 @@ export function basic_commands_for_tile_condition(obj) {
     commands.push(command);
   }
   commands.push(0);
-  command = random_by_choice((n = type_of_actions), (props = probs_of_actions));
-  while (command === 0) command = random_by_choice((n = type_of_actions), (props = probs_of_actions));
+  command = random_by_choice(type_of_actions, probs_of_actions);
+  while (command === 0) command = random_by_choice(type_of_actions, probs_of_actions);
   commands.push(command);
 
   if (is_reversed) {

@@ -22,12 +22,15 @@ const db = require('../db');
 //     });
 
 router.post('/get-map', async (req, res) => {
-  const maps = get_map({ commandlength: 7 });
+  const maps = get_map({ commandLength: 6, itemCollected: 1 });
 
-  const { player, ...tiles } = maps;
+  const { player, blocks, ...tiles } = maps;
+
+  console.log(blocks);
+  // console.log(tiles.tiles);
 
   // console.log(JSON.stringify(tiles));
-  return res.status(200).json({ tiles, player });
+  return res.status(200).json({ tiles, player, blocks });
 });
 
 router.get('/catagory', async (req, res) => {

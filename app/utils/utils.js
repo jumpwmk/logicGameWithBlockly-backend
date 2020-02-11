@@ -30,3 +30,16 @@ export function shuffle(arr) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
 }
+
+// convert arrat to an object
+
+export function arrToObject(arr) {
+  let obj = {};
+
+  for (var i = 0; i < arr.length; i++) {
+    let tmp = arr[i];
+    obj[i] = tmp;
+  }
+
+  return obj;
+}

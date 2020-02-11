@@ -1,6 +1,7 @@
 import { slice_2d_array } from '../utils/utils';
 import { basic_commands, reverse_basic_commands } from './basicCommands';
 import { for_loop_commands } from './loopCommands';
+import { if_else_tile_condition_commands_with_loop } from './decisionMakingCommands';
 
 import { mapW_real, mapH_real, mapW, mapH } from '../config/constant';
 
@@ -28,7 +29,7 @@ function add_floatingobj(obj) {
   var y = obj.y;
   var objtype = 'gem';
   var objvari = 1;
-  mapData.floatingobj[x][y] = { objtype: objtype, objvari: objvari };
+  mapData.floatingobj[x][y] = { objtype: objtype, objvari: objvari, visible: true };
 }
 
 function add_tileoverlay(obj) {
@@ -351,6 +352,21 @@ function generate_map(obj) {
   return true;
 }
 
+function count_blocks(commands) {
+  let res = 0;
+  // console.log(commands);
+  commands = commands.commands;
+  for (let i = 0; i < commands.length; i++) {
+    if (commands[i] instanceof Object) {
+      res += count_blocks(commands[i]);
+    } else {
+      res += 1;
+    }
+    // console.log(res);
+  }
+  return res;
+}
+
 function generate_tiles(mapData) {
   // const direction_to_word = ['xb', 'yf', 'xf', 'yb'];
   const direction_to_num = [1, 2, 4, 8];
@@ -358,16 +374,25 @@ function generate_tiles(mapData) {
   const nxt = { 0: [-1, 0], 1: [0, 1], 2: [1, 0], 3: [0, -1] };
 
   const FINAL = 1024;
+  const FLOATING_OBJ = 16;
 
   for (var i = 0; i < mapW; i++) {
     for (var j = 0; j < mapH; j++) {
+      if (!mapData.platform[i][j]) {
+        continue;
+      }
+      if (mapData.floatingobj[i][j] !== undefined) {
+        mapData.tiles[i][j] += FLOATING_OBJ;
+      }
       for (var k = 0; k < 4; k++) {
-        if (mapData.wall[i][j] !== undefined && k in mapData.wall[i][j]) {
+        if (mapData.wall[i][j] !== undefined && k in mapData.wall[i][j] && 'permanent' in mapData.wall[i][j][k]) {
           mapData.tiles[i][j] += direction_to_num[k];
         } else {
-          const nx_ii = i + nxt[k][0];
-          const nx_jj = j + nxt[k][1];
-          if (mapData.platform[i][j] === 1 && mapData.platform[nx_ii][nx_jj] === 0) {
+          let nx_ii = i + nxt[k][0];
+          let nx_jj = j + nxt[k][1];
+          if (nx_ii < 0 || nx_ii >= mapW || nx_jj < 0 || nx_jj >= mapH) {
+            mapData.tiles[i][j] += direction_to_num[k];
+          } else if (mapData.platform[i][j] === 1 && mapData.platform[nx_ii][nx_jj] === 0) {
             mapData.tiles[i][j] += direction_to_num[k];
           }
         }
@@ -424,7 +449,8 @@ function transform_map(obj) {
   mapData.player = {
     position: [mapData.start.x - stX, mapData.start.y - stY],
     beginPosition: [mapData.start.x - stX, mapData.start.y - stY],
-    facing: direction_to_word[mapData.start.facing]
+    facing: direction_to_word[mapData.start.facing],
+    beginFacing: direction_to_word[mapData.start.facing]
   };
   mapData.end = { x: mapData.end.x - stX, y: mapData.end.y - stY };
   mapData.platform = slice_2d_array(mapData.platform, stX, stX + mapW, stY, stY + mapH);
@@ -455,9 +481,9 @@ function transform_map(obj) {
         }
       } else if (mapData.platform[i][j] === 0) {
         mapData.wall[i][j] = undefined;
-        for (var k = 0; k < 4; k++) {
-          var new_i = i + directions[k][0];
-          var new_j = j + directions[k][1];
+        for (let k = 0; k < 4; k++) {
+          let new_i = i + directions[k][0];
+          let new_j = j + directions[k][1];
           if (new_i < 0 || new_j < 0 || new_i >= mapW || new_j >= mapH) continue;
           if (mapData.wall[new_i][new_j] !== undefined && (k + 2) % 4 in mapData.wall[new_i][new_j]) {
             delete mapData.wall[new_i][new_j][(k + 2) % 4];
@@ -469,9 +495,9 @@ function transform_map(obj) {
 
   generate_tiles(mapData);
 
-  for (var i = 0; i < mapW; i++) {
-    for (var j = 0; j < mapH; j++) {
-      for (var k = 0; k < 4; k++) {
+  for (let i = 0; i < mapW; i++) {
+    for (let j = 0; j < mapH; j++) {
+      for (let k = 0; k < 4; k++) {
         if (mapData.wall[i][j] !== undefined && k in mapData.wall[i][j]) {
           if ((k === 0 || k === 1) && 'permanent' in mapData.wall[i][j][k])
             mapData.wall[i][j][direction_to_word[k]] = mapData.wall[i][j][k];
@@ -488,27 +514,39 @@ function transform_map(obj) {
   delete mapData.start;
 }
 
+function get_gems(mapData) {
+  let res = 0;
+  for (let i = 0; i < mapW; i++) {
+    for (let j = 0; j < mapH; j++) {
+      if (mapData.floatingobj[i][j] && mapData.floatingobj[i][j].objtype === 'gem') {
+        res++;
+      }
+    }
+  }
+  return res;
+}
+
 export function get_map(obj) {
   // console.log(obj);
   let {
-    commandlength,
-    commandlengthincondition,
-    itemcollected,
-    numiteration,
-    numturninloop,
-    number_of_distractions
+    commandLength,
+    commandLengthInCondition,
+    itemCollected,
+    numIteration,
+    numTurnInLoop,
+    numberOfDistractions
   } = obj;
 
-  if (commandlength === undefined) commandlength = 5;
-  if (commandlengthincondition === undefined) commandlengthincondition = 0;
-  if (itemcollected === undefined) itemcollected = 0;
-  if (numiteration === undefined) numiteration = 0;
-  if (numturninloop === undefined) numturninloop = 0;
-  if (number_of_distractions === undefined) number_of_distractions = 0;
+  if (commandLength === undefined) commandLength = 5;
+  if (commandLengthInCondition === undefined) commandLengthInCondition = 0;
+  if (itemCollected === undefined) itemCollected = 0;
+  if (numIteration === undefined) numIteration = 0;
+  if (numTurnInLoop === undefined) numTurnInLoop = 0;
+  if (numberOfDistractions === undefined) numberOfDistractions = 0;
 
-  itemcollected = parseInt(itemcollected);
+  itemCollected = parseInt(itemCollected);
 
-  if (itemcollected === 0) {
+  if (itemCollected === 0) {
     probs_of_actions = [0.5, 0.25, 0.25, 0, 0]; // 0: go ahead, 1: turn right, 2: turn left, 3: do action I, 4: do action II
     type_of_actions = 3;
   } else {
@@ -518,56 +556,64 @@ export function get_map(obj) {
 
   // console.log(probs_of_actions);
 
-  var number_of_tries = 2000;
-  while (number_of_tries--) {
+  var numberOfTries = 2000;
+  while (numberOfTries--) {
     var chk = false;
     let commands;
-    if (commandlengthincondition > 0) {
-      if (numiteration > 0)
+    if (commandLengthInCondition > 0) {
+      if (numIteration > 0) {
         commands = if_else_tile_condition_commands_with_loop({
           condition_type: 'if',
-          number_of_commands: commandlengthincondition,
-          number_of_iterations: numiteration,
+          number_of_commands: commandLengthInCondition,
+          number_of_iterations: numIteration,
           is_reversed: false
         });
-      else
+      } else {
         commands = if_else_tile_condition_commands_with_loop({
           condition_type: 'if',
-          number_of_commands: commandlengthincondition,
+          number_of_commands: commandLengthInCondition,
           number_of_iterations: 8,
           is_reversed: false
         });
-    } else if (numiteration > 0) {
-      if (numturninloop === '0')
+      }
+    } else if (numIteration > 0) {
+      if (numTurnInLoop === '0') {
         commands = for_loop_commands({
           number_of_turns: 2,
-          number_of_commands: commandlength,
-          number_of_iterations: numiteration
+          number_of_commands: commandLength,
+          number_of_iterations: numIteration
         });
-      else {
+      } else {
         commands = for_loop_commands({
-          number_of_turns: numturninloop,
-          number_of_commands: commandlength,
-          number_of_iterations: numiteration
+          number_of_turns: numTurnInLoop,
+          number_of_commands: commandLength,
+          number_of_iterations: numIteration
         });
       }
     } else {
-      commands = basic_commands({ number_of_commands: commandlength, probs_of_actions, type_of_actions });
+      commands = basic_commands({ number_of_commands: commandLength, probs_of_actions, type_of_actions });
     }
+
+    console.log(commands);
 
     // commands = for_loop_commands({number_of_turns: 3, number_of_commands: 6, number_of_iterations: 3});
     // commands = basic_commands({number_of_commands: 6});
     // commands = if_else_tile_condition_commands_with_loop({condition_type: "if", number_of_commands: 1, number_of_iterations: 20, is_reversed: false});
-    let number_of_tries_generate_map = 5;
-    while (number_of_tries_generate_map--) {
+    let numberOfTriesGenerateMap = 10;
+    while (numberOfTriesGenerateMap--) {
       var mapData = init_mapData();
       if (generate_map({ commands, mapData }) === false) continue;
-      if (transform_map({ mapData, number_of_distractions }) === false) continue;
+      if (transform_map({ mapData, numberOfDistractions }) === false) continue;
       chk = true;
       break;
     }
-    if (chk) break;
+    if (chk) {
+      const gems = get_gems(mapData);
+      mapData.blocks = { maxBlocks: count_blocks(commands), maxGems: gems, cntGems: 0 };
+      console.log(mapData.blocks);
+      break;
+    }
   }
-  // console.log(commands, mapData);
+  // console.log(commands);
   if (chk) return mapData;
 }
