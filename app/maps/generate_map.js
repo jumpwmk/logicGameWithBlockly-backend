@@ -534,7 +534,8 @@ export function get_map(obj) {
     itemCollected,
     numIteration,
     numTurnInLoop,
-    numberOfDistractions
+    numberOfDistractions,
+    is_reversed
   } = obj;
 
   if (commandLength === undefined) commandLength = 5;
@@ -543,6 +544,7 @@ export function get_map(obj) {
   if (numIteration === undefined) numIteration = 0;
   if (numTurnInLoop === undefined) numTurnInLoop = 0;
   if (numberOfDistractions === undefined) numberOfDistractions = 0;
+  if (is_reversed === undefined) is_reversed = false;
 
   itemCollected = parseInt(itemCollected);
 
@@ -566,14 +568,18 @@ export function get_map(obj) {
           condition_type: 'if',
           number_of_commands: commandLengthInCondition,
           number_of_iterations: numIteration,
-          is_reversed: false
+          is_reversed: is_reversed,
+          probs_of_actions,
+          type_of_actions
         });
       } else {
         commands = if_else_tile_condition_commands_with_loop({
           condition_type: 'if',
           number_of_commands: commandLengthInCondition,
           number_of_iterations: 8,
-          is_reversed: false
+          is_reversed: is_reversed,
+          probs_of_actions,
+          type_of_actions
         });
       }
     } else if (numIteration > 0) {
@@ -581,20 +587,24 @@ export function get_map(obj) {
         commands = for_loop_commands({
           number_of_turns: 2,
           number_of_commands: commandLength,
-          number_of_iterations: numIteration
+          number_of_iterations: numIteration,
+          probs_of_actions,
+          type_of_actions
         });
       } else {
         commands = for_loop_commands({
           number_of_turns: numTurnInLoop,
           number_of_commands: commandLength,
-          number_of_iterations: numIteration
+          number_of_iterations: numIteration,
+          probs_of_actions,
+          type_of_actions
         });
       }
     } else {
       commands = basic_commands({ number_of_commands: commandLength, probs_of_actions, type_of_actions });
     }
 
-    console.log(commands);
+    console.log(commands.commands);
 
     // commands = for_loop_commands({number_of_turns: 3, number_of_commands: 6, number_of_iterations: 3});
     // commands = basic_commands({number_of_commands: 6});
@@ -609,7 +619,12 @@ export function get_map(obj) {
     }
     if (chk) {
       const gems = get_gems(mapData);
-      mapData.blocks = { maxBlocks: count_blocks(commands), maxGems: gems, cntGems: 0 };
+      mapData.blocks = {
+        maxBlocks: count_blocks(commands),
+        maxGems: gems,
+        cntGems: 0,
+        cntBlocks: 0
+      };
       console.log(mapData.blocks);
       break;
     }

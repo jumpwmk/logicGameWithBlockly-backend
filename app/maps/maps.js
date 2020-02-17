@@ -22,7 +22,7 @@ const db = require('../db');
 //     });
 
 router.post('/get-map', async (req, res) => {
-  const maps = get_map({ commandLength: 6, itemCollected: 1 });
+  const maps = get_map({ commandLengthInCondition: 5, itemCollected: 1, is_reversed: false });
 
   const { player, blocks, ...tiles } = maps;
 

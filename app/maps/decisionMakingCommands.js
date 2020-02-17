@@ -110,7 +110,16 @@ export function if_tile_condition_commands(obj) {
 }
 
 export function if_else_tile_condition_commands(obj) {
-  let { condition_type, commands, commands_else, condition, number_of_commands, is_reversed } = obj;
+  let {
+    condition_type,
+    commands,
+    commands_else,
+    condition,
+    number_of_commands,
+    is_reversed,
+    type_of_actions,
+    probs_of_actions
+  } = obj;
 
   if (condition_type === undefined) condition_type = 'if';
   if (condition === undefined) condition = 'on red tile';
@@ -121,14 +130,18 @@ export function if_else_tile_condition_commands(obj) {
     commands = basic_commands_for_tile_condition({
       number_of_commands: number_of_commands,
       commands: commands,
-      is_reversed: is_reversed
+      is_reversed: is_reversed,
+      type_of_actions,
+      probs_of_actions
     });
     commands = if_tile_condition_commands({ commands: commands, condition: condition, condition_type: condition_type });
   } else if (condition_type === 'if_else') {
     commands = basic_commands_for_tile_condition({
       number_of_commands: number_of_commands,
       commands: commands,
-      is_reversed: is_reversed
+      is_reversed: is_reversed,
+      type_of_actions,
+      probs_of_actions
     });
     commands = if_tile_condition_commands({
       commands: commands,
@@ -141,15 +154,19 @@ export function if_else_tile_condition_commands(obj) {
 }
 
 export function if_else_tile_condition_commands_with_loop(obj) {
-  var condition_type = obj.condition_type;
-  var number_of_commands = obj.number_of_commands;
-  var number_of_iterations = obj.number_of_iterations;
-  var is_reversed = obj.is_reversed;
+  let {
+    condition_type,
+    number_of_commands,
+    number_of_iterations,
+    is_reversed,
+    type_of_actions,
+    probs_of_actions
+  } = obj;
 
   if (condition_type === undefined) condition_type = 'if';
   if (number_of_commands === undefined) number_of_commands = 2;
   if (number_of_iterations === undefined) number_of_iterations = 5;
-  if (is_reversed === undefined) is_reversed = true;
+  if (is_reversed === undefined) is_reversed = false;
 
   var conditions = ['on grey tile', 'on red tile'];
   shuffle(conditions);
@@ -159,7 +176,9 @@ export function if_else_tile_condition_commands_with_loop(obj) {
       condition_type: condition_type,
       condition: conditions[0],
       number_of_commands: number_of_commands,
-      is_reversed: is_reversed
+      is_reversed,
+      type_of_actions,
+      probs_of_actions
     });
     commands = [commands, 0];
   } else if (condition_type === 'if_else') {
@@ -167,14 +186,18 @@ export function if_else_tile_condition_commands_with_loop(obj) {
       condition_type: 'if',
       condition: conditions[1],
       number_of_commands: number_of_commands,
-      is_reversed: is_reversed
+      is_reversed,
+      type_of_actions,
+      probs_of_actions
     });
     commands = if_else_tile_condition_commands({
-      condition_type: condition_type,
-      commands_else: commands_else,
+      condition_type,
+      commands_else,
       condition: conditions[0],
       number_of_commands: number_of_commands,
-      is_reversed: is_reversed
+      is_reversed,
+      type_of_actions,
+      probs_of_actions
     });
     commands = [commands, 0];
   } else if (condition_type === 'nested_if') {
