@@ -1,0 +1,37 @@
+{
+  "1": {
+    "commandLength": 3,
+    "commandLengthInCondition": 0,
+    "numIteration": 0,
+    "numTurnInLoop": 0,
+    "numberOfDistractions": 0,
+    "condition_type": "if_else",
+    "condition_cate": "path",
+    "is_reversed": false,
+    "probs_of_actions": [1, 0, 0, 0, 0],
+    "type_of_actions": 1
+  },
+  "2": {
+    "commands": [0, 1, 0, 2, 0]
+  },
+  "3": {
+    "commandLength": 5,
+    "commandLengthInCondition": 0,
+    "numIteration": 0,
+    "numTurnInLoop": 0,
+    "numberOfDistractions": 0,
+    "is_reversed": false,
+    "probs_of_actions": [0.5, 0.25, 0.25, 0, 0],
+    "type_of_actions": 3
+  },
+  "4": {
+    "commandLength": 7,
+    "commandLengthInCondition": 0,
+    "numIteration": 0,
+    "numTurnInLoop": 0,
+    "numberOfDistractions": 0,
+    "is_reversed": false,
+    "probs_of_actions": [0.5, 0.25, 0.25, 0, 0],
+    "type_of_actions": 3
+  }
+}

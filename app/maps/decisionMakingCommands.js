@@ -21,6 +21,10 @@ export function if_else_path_condition_commands(obj) {
 
   if (condition_type === undefined) condition_type = 'if';
 
+  // console.log(condition_type);
+
+  let commands = [];
+
   if (condition_type === 'if') {
     var pool_of_commands = [
       [[2], 'left'],
@@ -30,7 +34,7 @@ export function if_else_path_condition_commands(obj) {
     commands = if_path_condition_commands({
       commands: pool_of_commands[0][0],
       condition: pool_of_commands[0][1],
-      type: condition_type
+      condition_type
     });
   } else if (condition_type === 'if_else') {
     var pool_of_commands = [
@@ -45,12 +49,12 @@ export function if_else_path_condition_commands(obj) {
       commands: pool_of_commands[0][0],
       condition: pool_of_commands[0][1],
       commands_else: commands,
-      type: condition_type
+      condition_type
     });
   } else if (condition_type === 'nested_if') {
     var pool_of_commands = [
-      [[2], 'left'],
-      [[1], 'right'],
+      [[2, 0], 'left'],
+      [[1, 0], 'right'],
       [[0], 'ahead']
     ];
     while (true) {
@@ -64,14 +68,14 @@ export function if_else_path_condition_commands(obj) {
         commands: pool_of_commands[1][0],
         condition: pool_of_commands[1][1],
         commands_else: pool_of_commands[2][0],
-        type: 'if_else'
+        condition_type: 'if_else'
       })
     ];
     commands = if_path_condition_commands({
       commands: pool_of_commands[0][0],
       condition: pool_of_commands[0][1],
       commands_else: commands,
-      type: condition_type
+      condition_type: 'if_else'
     });
   } else {
     console.log('error in condition type in if_else_path_condition_commands function');
@@ -168,9 +172,9 @@ export function if_else_tile_condition_commands_with_loop(obj) {
   if (number_of_iterations === undefined) number_of_iterations = 5;
   if (is_reversed === undefined) is_reversed = false;
 
-  var conditions = ['on grey tile', 'on red tile'];
+  let conditions = ['on grey tile', 'on red tile'];
   shuffle(conditions);
-  var commands = {};
+  let commands = {};
   if (condition_type === 'if') {
     commands = if_else_tile_condition_commands({
       condition_type: condition_type,
@@ -182,14 +186,16 @@ export function if_else_tile_condition_commands_with_loop(obj) {
     });
     commands = [commands, 0];
   } else if (condition_type === 'if_else') {
-    commands_else = if_else_tile_condition_commands({
-      condition_type: 'if',
-      condition: conditions[1],
-      number_of_commands: number_of_commands,
-      is_reversed,
-      type_of_actions,
-      probs_of_actions
-    });
+    const commands_else = [
+      if_else_tile_condition_commands({
+        condition_type: 'if',
+        condition: conditions[1],
+        number_of_commands: number_of_commands,
+        is_reversed,
+        type_of_actions,
+        probs_of_actions
+      })
+    ];
     commands = if_else_tile_condition_commands({
       condition_type,
       commands_else,

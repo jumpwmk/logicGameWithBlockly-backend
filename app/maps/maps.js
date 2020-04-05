@@ -1,4 +1,5 @@
 import { get_map } from './generate_map';
+import { if_else_path_condition_commands_with_loop } from './decisionMakingCommands';
 
 const express = require('express');
 const router = express.Router();
@@ -22,15 +23,32 @@ const db = require('../db');
 //     });
 
 router.post('/get-map', async (req, res) => {
-  const maps = get_map({ commandLengthInCondition: 5, itemCollected: 1, is_reversed: false });
+  console.log(req.body.level);
+  const documentRef = await db
+    .collection('maps')
+    .doc(req.body.level.toString())
+    .get();
+  const data = documentRef.data();
+
+  const maps = get_map(data);
 
   const { player, blocks, ...tiles } = maps;
 
-  console.log(blocks);
-  // console.log(tiles.tiles);
-
-  // console.log(JSON.stringify(tiles));
   return res.status(200).json({ tiles, player, blocks });
+});
+
+router.post('/testtest', async (req, res) => {
+  const data = {
+    condition_type: 'nested_if',
+    condition_cate: 'path',
+    number_of_iterations: 8
+  };
+
+  const commands = if_else_path_condition_commands_with_loop(data);
+
+  const maps = get_map(data);
+  // return res.status(200).json(commands);
+  return res.status(200).json(maps);
 });
 
 router.get('/catagory', async (req, res) => {
