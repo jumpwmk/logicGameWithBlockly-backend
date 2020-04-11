@@ -72,7 +72,7 @@ function build_permanent_wall(obj) {
     [-1, 0],
     [0, 1],
     [1, 0],
-    [0, -1]
+    [0, -1],
   ];
   let x = bot.x;
   let y = bot.y;
@@ -101,7 +101,7 @@ function init_mapData() {
     tileoverlay: new Array(mapW_real).fill().map(() => new Array(mapH_real).fill(undefined)),
     floatingobj: new Array(mapW_real).fill().map(() => new Array(mapH_real).fill(undefined)),
     walloverlay: new Array(mapW_real).fill().map(() => new Array(mapH_real).fill(undefined)),
-    tiles: new Array(mapW_real).fill().map(() => new Array(mapH_real).fill(0))
+    tiles: new Array(mapW_real).fill().map(() => new Array(mapH_real).fill(0)),
   };
   for (var i = 0; i < mapW_real; i++) {
     for (var j = 0; j < mapH_real; j++) {
@@ -123,7 +123,7 @@ function generate_distraction(obj) {
     [-1, 0],
     [0, 1],
     [1, 0],
-    [0, -1]
+    [0, -1],
   ];
   var mapData = obj.mapData;
   var number_of_distractions = obj.number_of_distractions;
@@ -239,7 +239,7 @@ function generate_map(obj) {
     [-1, 0],
     [0, 1],
     [1, 0],
-    [0, -1]
+    [0, -1],
   ];
 
   var commands = obj.commands;
@@ -414,6 +414,106 @@ function count_blocks(commands) {
   return res;
 }
 
+function get_commands(commands) {
+  let res = [];
+  const { commands_else } = commands;
+  if (commands.type === 'for') {
+    res.push('for');
+    res.push('while_inf');
+  }
+  commands = commands.commands;
+  for (let i = 0; i < commands.length; i++) {
+    if (commands[i] instanceof Object) {
+      if (commands[i].type === 'if') {
+        if (
+          commands[i].condition === 'ahead' ||
+          commands[i].condition === 'left' ||
+          commands[i].condition === 'right'
+        ) {
+          res.push('if_path');
+        } else {
+          res.push('if_tile');
+        }
+      } else if (commands[i].type === 'if_else') {
+        if (
+          commands[i].condition === 'ahead' ||
+          commands[i].condition === 'left' ||
+          commands[i].condition === 'right'
+        ) {
+          res.push('if_path');
+          res.push('if_else_path');
+        } else {
+          res.push('if_tile');
+          res.push('if_else_tile');
+        }
+      } else {
+        res.push('for');
+        res.push('while_inf');
+      }
+      res.push(...get_commands(commands[i]));
+    } else if (commands[i] === 0) {
+      res.push('go_ahead');
+    } else if (commands[i] === 1) {
+      res.push('turn_left');
+      res.push('turn_right');
+    } else if (commands[i] === 2) {
+      res.push('turn_left');
+      res.push('turn_right');
+    } else if (commands[i] === 3) {
+      res.push('IDK');
+    } else if (commands[i] === 4) {
+      res.push('collect');
+    }
+  }
+  if (commands_else) {
+    for (let i = 0; i < commands_else.length; i++) {
+      if (commands_else[i] instanceof Object) {
+        if (commands_else[i].type === 'if') {
+          if (
+            commands_else[i].condition === 'ahead' ||
+            commands_else[i].condition === 'left' ||
+            commands_else[i].condition === 'right'
+          ) {
+            res.push('if_path');
+          } else {
+            res.push('if_tile');
+          }
+        } else if (commands_else[i].type === 'if_else') {
+          if (
+            commands_else[i].condition === 'ahead' ||
+            commands_else[i].condition === 'left' ||
+            commands_else[i].condition === 'right'
+          ) {
+            res.push('if_path');
+            res.push('if_else_path');
+          } else {
+            res.push('if_tile');
+            res.push('if_else_tile');
+          }
+        } else {
+          res.push('for');
+          res.push('while_inf');
+        }
+        res.push(...get_commands(commands_else[i]));
+      } else if (commands_else[i] === 0) {
+        res.push('go_ahead');
+      } else if (commands_else[i] === 1) {
+        res.push('turn_left');
+        res.push('turn_right');
+      } else if (commands_else[i] === 2) {
+        res.push('turn_left');
+        res.push('turn_right');
+      } else if (commands_else[i] === 3) {
+        res.push('IDK');
+      } else if (commands_else[i] === 4) {
+        res.push('collect');
+      }
+    }
+  }
+  let unique = [...new Set(res)];
+  return unique;
+}
+
 function generate_tiles(mapData) {
   // const direction_to_word = ['xb', 'yf', 'xf', 'yb'];
   const DIRECTION_TO_NUM = [1, 2, 4, 8];
@@ -468,7 +568,7 @@ function transform_map(obj) {
     [-1, 0],
     [0, 1],
     [1, 0],
-    [0, -1]
+    [0, -1],
   ];
 
   if (mapData.check_object[bot.x][bot.y] === true || mapData.count[bot.x][bot.y] > 1) return false;
@@ -501,7 +601,7 @@ function transform_map(obj) {
     position: [mapData.start.x - stX, mapData.start.y - stY],
     beginPosition: [mapData.start.x - stX, mapData.start.y - stY],
     facing: direction_to_word[mapData.start.facing],
-    beginFacing: direction_to_word[mapData.start.facing]
+    beginFacing: direction_to_word[mapData.start.facing],
   };
   mapData.end = { x: mapData.end.x - stX, y: mapData.end.y - stY };
   mapData.platform = slice_2d_array(mapData.platform, stX, stX + mapW, stY, stY + mapH);
@@ -589,7 +689,7 @@ export function get_map(obj) {
     condition_type,
     condition_cate,
     probs_of_actions,
-    type_of_actions
+    type_of_actions,
   } = obj;
 
   if (commandLength === undefined) commandLength = 5;
@@ -602,12 +702,12 @@ export function get_map(obj) {
   if (type_of_actions === undefined) type_of_actions = 3;
   if (condition_type === undefined) condition_type = 'if';
 
-  // console.log(probs_of_actions);
+  console.log(obj);
 
   var numberOfTries = 2000;
+  var commands;
   while (numberOfTries--) {
     var chk = false;
-    let commands;
     if (condition_cate) {
       if (numIteration === 0) {
         numIteration = 8;
@@ -619,12 +719,12 @@ export function get_map(obj) {
           number_of_iterations: numIteration,
           is_reversed: is_reversed,
           probs_of_actions,
-          type_of_actions
+          type_of_actions,
         });
       } else if (condition_cate === 'path') {
         commands = if_else_path_condition_commands_with_loop({
           condition_type,
-          number_of_iterations: numIteration
+          number_of_iterations: numIteration,
         });
       } else {
         console.log('condition_cate is not defined');
@@ -637,7 +737,7 @@ export function get_map(obj) {
           number_of_commands: commandLength,
           number_of_iterations: numIteration,
           probs_of_actions,
-          type_of_actions
+          type_of_actions,
         });
       } else {
         commands = for_loop_commands({
@@ -645,7 +745,7 @@ export function get_map(obj) {
           number_of_commands: commandLength,
           number_of_iterations: numIteration,
           probs_of_actions,
-          type_of_actions
+          type_of_actions,
         });
       }
     } else {
@@ -673,7 +773,8 @@ export function get_map(obj) {
         maxBlocks: count_blocks(commands),
         maxGems: gems,
         cntGems: 0,
-        cntBlocks: 0
+        cntBlocks: 0,
+        command_blocks: get_commands(commands),
       };
       console.log(mapData.blocks);
       break;

@@ -43,3 +43,15 @@ export function arrToObject(arr) {
 
   return obj;
 }
+
+export function objectToArr(obj) {
+  let arr = [];
+
+  for (var i = 0; i < 11; i++) {
+    if (i in obj) {
+      arr.push(obj[i]);
+    }
+  }
+
+  return arr;
+}

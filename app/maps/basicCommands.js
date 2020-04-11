@@ -15,7 +15,7 @@ export function basic_commands(obj) {
     [3, 3],
     [3, 4],
     [4, 3],
-    [4, 4]
+    [4, 4],
   ];
 
   let command = random_by_choice(type_of_actions, probs_of_actions);
@@ -85,10 +85,10 @@ export function basic_for_loop_commands(obj) {
     [3, 3],
     [3, 4],
     [4, 3],
-    [4, 4]
+    [4, 4],
   ];
 
-  commands = [];
+  let commands = [];
   if (number_of_commands - 2 * number_of_turns + 1 < 0) {
     console.log('cannot generate basic commands');
     return commands;
@@ -184,7 +184,7 @@ export function basic_commands_for_tile_condition(obj) {
     [3, 3],
     [3, 4],
     [4, 3],
-    [4, 4]
+    [4, 4],
   ];
   for (var i = 0; i < number_of_commands - 3; i++) {
     var chk = true;
