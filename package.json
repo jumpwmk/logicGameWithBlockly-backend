@@ -1,6 +1,9 @@
 {
   "name": "logicgamewithblockly-backend",
   "version": "1.0.0",
+  "engines": {
+    "node": "10.15.x"
+  },
   "description": "",
   "main": "app/app.js",
   "scripts": {
