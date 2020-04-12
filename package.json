@@ -2,7 +2,7 @@
   "name": "logicgamewithblockly-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "app/app.js",
+  "main": "app/server.js",
   "scripts": {
     "dev": "nodemon app/server.js",
     "start": "NODE_ENV=test nodemon --exec babel-node app/server.js",
