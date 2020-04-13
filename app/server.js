@@ -3,8 +3,8 @@ require('dotenv').config();
 const https = require('https');
 const fs = require('fs');
 
-var key = fs.readFileSync('../../selfsigned.key');
-var cert = fs.readFileSync('../../selfsigned.crt');
+var key = fs.readFileSync('/home/ubuntu/selfsigned.key');
+var cert = fs.readFileSync('/home/ubuntu/selfsigned.crt');
 var options = {
   key: key,
   cert: cert,
