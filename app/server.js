@@ -1,20 +1,39 @@
 require('dotenv').config();
 
-// const https = require('https');
-// const fs = require('fs');
+// const app = require('./app');
+// const port = process.env.PORT || 3001;
 
-// var key = fs.readFileSync('/home/ubuntu/selfsigned.key');
-// var cert = fs.readFileSync('/home/ubuntu/selfsigned.crt');
-// var options = {
-//   key: key,
-//   cert: cert,
-// };
+// const server = app.listen(port, () => {
+//   console.log('Express server listening on port ' + port);
+// });
+
+// Dependencies
+const fs = require('fs');
+const http = require('http');
+const https = require('https');
 
 const app = require('./app');
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 443;
 
-// var server_tmp = https.createServer(options, app);
+// Certificate
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/robolog1412.com/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/robolog1412.com/cert.pem', 'utf8');
+const ca = fs.readFileSync('/etc/letsencrypt/live/robolog1412.com/chain.pem', 'utf8');
 
-const server = app.listen(port, () => {
-  console.log('Express server listening on port ' + port);
+const credentials = {
+  key: privateKey,
+  cert: certificate,
+  ca: ca,
+};
+
+// Starting both http & https servers
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(credentials, app);
+
+httpServer.listen(80, () => {
+  console.log('HTTP Server running on port 80');
+});
+
+httpsServer.listen(443, () => {
+  console.log('HTTPS Server running on port 443');
 });
